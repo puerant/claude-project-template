@@ -39,3 +39,16 @@ class InvalidStatusTransitionError(HTTPException):
         super().__init__(
             status_code=409, detail={"code": 40901, "message": "非法状态流转"}
         )
+
+class GitCommandError(Exception):
+    """Git 命令执行失败异常"""
+    pass
+
+
+class GitError(HTTPException):
+    """Git 操作失败错误 (50003)"""
+
+    def __init__(self, detail: str = "Git 操作失败"):
+        super().__init__(
+            status_code=500, detail={"code": 50003, "message": detail}
+        )
