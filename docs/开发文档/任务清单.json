@@ -187,7 +187,7 @@
       "title": "输出解析器与执行引擎整合",
       "description": "## 描述\n\n异步监听 Claude Code 进程 stdout，解析结果标记，驱动任务状态机。整合 Git 服务、进程管理、Prompt 构建为完整的执行引擎。\n\n## 功能描述\n\n异步监听 Claude Code 进程 stdout，解析结果标记，驱动任务状态机。整合 Git 服务、进程管理、Prompt 构建为完整的执行引擎。\n\n### 验收标准\n\n- 逐行读取 stdout，识别最后一行的 SUCCESS 或 FAILURE: <原因> 标记\n- SUCCESS：更新任务状态为 pending_review\n- FAILURE：更新任务状态为 failed，调用 FileWriter 追加经验总结\n- 进程意外退出（无结果标记）：状态置为 failed，写入异常信息到经验总结\n- POST /api/tasks/{taskId}/execute 触发完整流程：校验状态 → 创建分支 → 创建 worktree → 构建 Prompt → 启动进程 → 状态置为 in_progress，接口立即返回\n- 取消任务时同步终止进程并调用 remove_worktree",
       "module": "执行引擎",
-      "status": "pending",
+      "status": "completed",
       "acceptanceCriteria": [
         "逐行读取 stdout，识别最后一行的 SUCCESS 或 FAILURE: <原因> 标记",
         "SUCCESS：更新任务状态为 pending_review",
@@ -200,7 +200,7 @@
       "worktreePath": null,
       "bugReportPath": null,
       "createdAt": "2026-02-27T16:00:00+08:00",
-      "updatedAt": "2026-02-27T16:00:00+08:00"
+      "updatedAt": "2026-02-28T00:00:00+08:00"
     },
     {
       "id": "m2-t08-log-service",
