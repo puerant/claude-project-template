@@ -128,7 +128,7 @@
       "title": "Git 服务模块",
       "description": "## 描述\n\n封装 Git 操作，供执行引擎调用。所有 Git 命令通过 Python subprocess 调用本地 git CLI。\n\n## 功能描述\n\n封装 Git 操作，供执行引擎调用。所有 Git 命令通过 Python subprocess 调用本地 git CLI。\n\n### 验收标准\n\n- create_branch(repo_path, branch_name, base=\"dev\") 从 dev 切出新分支\n- create_worktree(repo_path, worktree_path, branch_name) 创建 worktree\n- remove_worktree(repo_path, worktree_path) 删除 worktree\n- commit_and_push(worktree_path, message) 在 worktree 内提交并推送\n- 任意步骤失败时抛出包含 git stderr 的异常，调用方统一处理",
       "module": "执行引擎",
-      "status": "pending",
+      "status": "completed",
       "acceptanceCriteria": [
         "create_branch(repo_path, branch_name, base=\"dev\") 从 dev 切出新分支",
         "create_worktree(repo_path, worktree_path, branch_name) 创建 worktree",
@@ -140,7 +140,7 @@
       "worktreePath": null,
       "bugReportPath": null,
       "createdAt": "2026-02-27T16:00:00+08:00",
-      "updatedAt": "2026-02-27T16:00:00+08:00"
+      "updatedAt": "2026-02-27T21:00:00+08:00"
     },
     {
       "id": "m2-t05-prompt-builder",
@@ -148,7 +148,7 @@
       "title": "Prompt 构建器",
       "description": "## 描述\n\n根据任务信息和经验总结，构造发送给 Claude Code 的完整 Prompt 文本。\n\n## 功能描述\n\n根据任务信息和经验总结，构造发送给 Claude Code 的完整 Prompt 文本。\n\n### 验收标准\n\n- 输出包含：任务类型/标题/模块/描述、验收标准列表、分支和 worktree 路径说明\n- 若 经验总结.md 非空，将其全文附加到 Prompt 中\n- Prompt 末尾包含明确的结果格式要求：SUCCESS 或 FAILURE: <原因>\n- Prompt 为纯文本字符串，无多余格式",
       "module": "执行引擎",
-      "status": "pending",
+      "status": "completed",
       "acceptanceCriteria": [
         "输出包含：任务类型/标题/模块/描述、验收标准列表、分支和 worktree 路径说明",
         "若 经验总结.md 非空，将其全文附加到 Prompt 中",
@@ -159,7 +159,7 @@
       "worktreePath": null,
       "bugReportPath": null,
       "createdAt": "2026-02-27T16:00:00+08:00",
-      "updatedAt": "2026-02-27T16:00:00+08:00"
+      "updatedAt": "2026-02-27T22:00:00+08:00"
     },
     {
       "id": "m2-t06-process-manager",

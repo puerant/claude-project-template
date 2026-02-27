@@ -52,3 +52,12 @@ class GitError(HTTPException):
         super().__init__(
             status_code=500, detail={"code": 50003, "message": detail}
         )
+
+
+class ProcessError(HTTPException):
+    """进程操作错误 (50003)"""
+
+    def __init__(self, detail: str = "进程操作失败"):
+        super().__init__(
+            status_code=500, detail={"code": 50003, "message": detail}
+        )
