@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add -A)",
+      "Bash(git commit -m \"docs: 完成 PRD、架构设计、接口设计、任务清单文档:*)"
+    ]
+  }
+}
