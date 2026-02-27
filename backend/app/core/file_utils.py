@@ -71,3 +71,18 @@ def write_json(path: str, data: dict | list) -> None:
 
         # 原子重命名
         shutil.move(str(temp_path), str(file_path))
+
+
+def read_json_lines(path: str) -> list:
+    """读取 JSONL 文件，每行一个 JSON 对象"""
+    file_path = Path(path)
+    if not file_path.exists():
+        return []
+
+    lines = []
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                lines.append(json.loads(line))
+    return lines
