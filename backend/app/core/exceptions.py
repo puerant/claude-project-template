@@ -30,3 +30,12 @@ class ProjectNotFoundError(HTTPException):
 
     def __init__(self):
         super().__init__(status_code=404, detail={"code": 40401, "message": "项目不存在"})
+
+
+class InvalidStatusTransitionError(HTTPException):
+    """非法状态流转错误 (40901)"""
+
+    def __init__(self):
+        super().__init__(
+            status_code=409, detail={"code": 40901, "message": "非法状态流转"}
+        )

@@ -1,8 +1,9 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from app.core import read_json, write_json
-from app.models import Task, TaskStatus
+from app.models import Task, TaskStatus, TaskType
 from app.services.task_parser import TaskParser
+from app.core.exceptions import InvalidStatusTransitionError
 
 
 class TaskService:
@@ -22,6 +23,25 @@ class TaskService:
         tasks_file = self.get_tasks_file(project_id)
         tasks_data = read_json(str(tasks_file), default=[])
         return [Task(**t) for t in tasks_data]
+
+    def list_tasks_filtered(
+        self,
+        project_id: str,
+        status: Optional[TaskStatus] = None,
+        task_type: Optional[TaskType] = None,
+    ) -> List[Task]:
+        """获取项目的任务列表（支持过滤）"""
+        all_tasks = self.list_tasks(project_id)
+
+        filtered = all_tasks
+        if status:
+            filtered = [t for t in filtered if t.status == status]
+        if task_type:
+            filtered = [t for t in filtered if t.type == task_type]
+
+        # 按 updatedAt 降序排列
+        filtered.sort(key=lambda t: t.updatedAt, reverse=True)
+        return filtered
 
     def save_tasks(self, project_id: str, tasks: List[Task]) -> None:
         """保存项目任务"""
@@ -71,3 +91,47 @@ class TaskService:
             "unchanged": unchanged_count,
             "total": len(merged_tasks),
         }
+
+    def get_task(self, project_id: str, task_id: str) -> Task | None:
+        """获取指定任务详情"""
+        tasks = self.list_tasks(project_id)
+        for task in tasks:
+            if task.id == task_id:
+                return task
+        return None
+
+    def cancel_task(self, project_id: str, task_id: str) -> Task:
+        """取消任务"""
+        tasks = self.list_tasks(project_id)
+        for i, task in enumerate(tasks):
+            if task.id == task_id:
+                if task.status not in [
+                    TaskStatus.PENDING,
+                    TaskStatus.IN_PROGRESS,
+                    TaskStatus.PENDING_REVIEW,
+                ]:
+                    raise InvalidStatusTransitionError()
+
+                task.status = TaskStatus.CANCELLED
+                tasks[i] = task
+                break
+
+        self.save_tasks(project_id, tasks)
+        return task
+
+    def reset_task(self, project_id: str, task_id: str) -> Task:
+        """重置任务"""
+        tasks = self.list_tasks(project_id)
+        for i, task in enumerate(tasks):
+            if task.id == task_id:
+                if task.status != TaskStatus.FAILED:
+                    raise InvalidStatusTransitionError()
+
+                task.status = TaskStatus.PENDING
+                task.branch = None
+                task.worktreePath = None
+                tasks[i] = task
+                break
+
+        self.save_tasks(project_id, tasks)
+        return task
