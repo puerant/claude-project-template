@@ -69,7 +69,7 @@
       "title": "项目管理模块与 API",
       "description": "## 描述\n\n实现项目的增删查功能，对应接口设计第二章。\n\n## 功能描述\n\n实现项目的增删查功能，对应接口设计第二章。\n\n### 验收标准\n\n- GET /api/projects 返回项目列表，含 taskStats 统计\n- POST /api/projects 添加项目，校验：path 存在、存在 docs/开发文档/任务清单.md、路径未重复\n- DELETE /api/projects/{projectId} 仅移除记录，不删本地文件\n- 校验失败时返回对应错误码（40001 / 40901）",
       "module": "项目管理",
-      "status": "pending",
+      "status": "completed",
       "acceptanceCriteria": [
         "GET /api/projects 返回项目列表，含 taskStats 统计",
         "POST /api/projects 添加项目，校验：path 存在、存在 docs/开发文档/任务清单.md、路径未重复",
@@ -80,7 +80,7 @@
       "worktreePath": null,
       "bugReportPath": null,
       "createdAt": "2026-02-27T16:00:00+08:00",
-      "updatedAt": "2026-02-27T16:00:00+08:00"
+      "updatedAt": "2026-02-27T18:00:00+08:00"
     },
     {
       "id": "m2-t02-task-parser",
