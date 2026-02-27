@@ -1,0 +1,461 @@
+{
+  "tasks": [
+    {
+      "id": "m1-t01-backend-init",
+      "type": "feature",
+      "title": "后端工程初始化",
+      "description": "## 描述\n\n搭建 Python + FastAPI 后端工程骨架，建立目录结构，配置依赖管理。\n\n## 功能描述\n\n建立标准的 FastAPI 工程结构，配置依赖管理、跨域支持和自动数据目录创建。\n\n### 1.1 工程结构\n\n按架构设计建立 `backend/app/` 目录。\n\n### 1.2 依赖管理\n\n`requirements.txt` 包含以下依赖：FastAPI、uvicorn、pydantic、python-multipart、sse-starlette。\n\n### 1.3 跨域配置\n\n配置 CORS 允许前端 `http://localhost:5173` 跨域访问后端 API。\n\n### 1.4 数据目录初始化\n\n首次启动时自动创建 `data/` 及其子目录，避免后续文件操作因目录不存在而失败。",
+      "module": "后端基础",
+      "status": "completed",
+      "acceptanceCriteria": [
+        "backend/ 目录结构符合 1.1 定义",
+        "requirements.txt 包含 1.2 列出的全部依赖",
+        "执行 uvicorn main:app --host 0.0.0.0 --port 8765 服务启动成功",
+        "访问 http://localhost:8765/ 返回 200 状态码",
+        "前端从 http://localhost:5173 可调用后端 API（无跨域错误）",
+        "首次启动后 data/projects.json、data/tasks/、data/logs/ 目录自动创建"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:10:00+08:00"
+    },
+    {
+      "id": "m1-t02-pydantic-models",
+      "type": "feature",
+      "title": "Pydantic 数据模型定义",
+      "description": "## 描述\n\n定义系统全部 Pydantic 数据模型，作为后端的数据契约基础。\n\n## 功能描述\n\n定义项目、任务、日志三大实体的 Pydantic 模型，以及任务类型和状态的枚举类型。\n\n### 2.1 项目模型（Project）\n\n包含以下字段：id、name、path、createdAt、taskStats。\n\n### 2.2 任务模型（Task）\n\n包含以下字段：id、projectId、type、title、description、module、status、acceptanceCriteria、branch、worktreePath、bugReportPath、createdAt、updatedAt。\n\n### 2.3 日志模型（LogEntry）\n\n包含以下字段：ts、stream、line。\n\n### 2.4 枚举类型\n\nTaskType：FEATURE / BUG；TaskStatus：PENDING / IN_PROGRESS / PENDING_REVIEW / COMPLETED / FAILED / CANCELLED。",
+      "module": "后端基础",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "models/project.py 定义 Project 和 TaskStats 模型",
+        "models/task.py 定义 Task 模型以及 TaskType、TaskStatus 枚举",
+        "models/log.py 定义 LogEntry 模型以及 LogStream 枚举",
+        "所有模型可正常通过 model.model_dump() 序列化为 JSON",
+        "所有模型可正常通过 model.model_validate_json() 从 JSON 反序列化",
+        "所有枚举类型的值与 PRD 定义完全一致"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m1-t03-json-persistence",
+      "type": "feature",
+      "title": "JSON 文件持久化层",
+      "description": "## 描述\n\n实现对 `data/` 目录下 JSON 文件的读写封装，作为数据层的统一入口。\n\n## 功能描述\n\n实现 `data/` 目录下 JSON 文件的原子读写操作，防止写入中断导致文件损坏，并支持并发写入时的文件锁机制。\n\n### 3.1 核心函数\n\n#### read_json(path)\n\n- 功能：读取 JSON 文件并解析为 Python 对象/列表\n- 文件不存在时：返回 []（列表场景）或 {}（对象场景），不抛异常\n- 文件损坏时：抛出包含解析错误信息的异常\n\n#### write_json(path, data)\n\n- 功能：将 Python 对象/列表写入 JSON 文件\n- 实现原子写：先写入临时文件 .tmp，写入成功后重命名为目标文件\n- 文件不存在时：自动创建\n- 并发保护：同一文件写入时使用文件锁，避免并发冲突\n- 写入失败时：抛出包含错误信息的异常",
+      "module": "后端基础",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "提供 read_json(path) / write_json(path, data) 工具函数",
+        "read_json 文件不存在时返回空列表/空对象，不抛异常",
+        "write_json 使用原子写（临时文件 + 重命名）",
+        "并发写入同一文件时加文件锁，不丢数据",
+        "所有函数位于 backend/app/core/file_utils.py 中",
+        "支持跨平台（Windows / macOS / Linux）"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t01-project-api",
+      "type": "feature",
+      "title": "项目管理模块与 API",
+      "description": "## 描述\n\n实现项目的增删查功能，对应接口设计第二章。\n\n## 功能描述\n\n实现项目的增删查功能，对应接口设计第二章。\n\n### 验收标准\n\n- GET /api/projects 返回项目列表，含 taskStats 统计\n- POST /api/projects 添加项目，校验：path 存在、存在 docs/开发文档/任务清单.md、路径未重复\n- DELETE /api/projects/{projectId} 仅移除记录，不删本地文件\n- 校验失败时返回对应错误码（40001 / 40901）",
+      "module": "项目管理",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "GET /api/projects 返回项目列表，含 taskStats 统计",
+        "POST /api/projects 添加项目，校验：path 存在、存在 docs/开发文档/任务清单.md、路径未重复",
+        "DELETE /api/projects/{projectId} 仅移除记录，不删本地文件",
+        "校验失败时返回对应错误码（40001 / 40901）"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t02-task-parser",
+      "type": "feature",
+      "title": "任务清单解析模块",
+      "description": "## 描述\n\n将项目的 docs/开发文档/任务清单.md 解析为结构化任务数据，并支持合并更新。\n\n## 功能描述\n\n### 2.1 解析规则\n\n- 按 ## / ### 标题边界分割任务\n- 识别 [feature] / [bug] 类型标记\n- 提取模块名（**模块**：字段）、验收标准（**验收标准**：下的列表项）\n\n### 2.2 合并更新\n\nPOST /api/projects/{projectId}/sync 触发解析，新任务追加，已有任务状态不重置。\n\n### 验收标准\n\n- 按 ## / ### 标题边界分割任务\n- 识别 [feature] / [bug] 类型标记\n- 提取模块名（**模块**：字段）、验收标准（**验收标准**：下的列表项）\n- POST /api/projects/{projectId}/sync 触发解析，新任务追加，已有任务状态不重置\n- 响应返回 { added, unchanged, total }",
+      "module": "任务解析",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "按 ## / ### 标题边界分割任务",
+        "识别 [feature] / [bug] 类型标记",
+        "提取模块名（**模块**：字段）、验收标准（**验收标准**：下的列表项）",
+        "POST /api/projects/{projectId}/sync 触发解析，新任务追加，已有任务状态不重置",
+        "响应返回 { added, unchanged, total }"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t03-task-api",
+      "type": "feature",
+      "title": "任务管理模块与 API",
+      "description": "## 描述\n\n实现任务的查询和状态机流转，对应接口设计第三章（不含执行相关接口）。\n\n## 功能描述\n\n实现任务的查询和状态机流转，对应接口设计第三章（不含执行相关接口）。\n\n### 验收标准\n\n- GET /api/projects/{projectId}/tasks 支持 status / type 过滤，按 updatedAt 降序\n- GET /api/tasks/{taskId} 返回完整任务详情\n- POST /api/tasks/{taskId}/cancel 仅允许 pending / in_progress / pending_review 状态流转\n- POST /api/tasks/{taskId}/reset 仅允许 failed 状态流转，清空 branch / worktreePath 字段\n- 非法状态流转返回 40901",
+      "module": "任务管理",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "GET /api/projects/{projectId}/tasks 支持 status / type 过滤，按 updatedAt 降序",
+        "GET /api/tasks/{taskId} 返回完整任务详情",
+        "POST /api/tasks/{taskId}/cancel 仅允许 pending / in_progress / pending_review 状态流转",
+        "POST /api/tasks/{taskId}/reset 仅允许 failed 状态流转，清空 branch / worktreePath 字段",
+        "非 法状态流转返回 40901"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t04-git-service",
+      "type": "feature",
+      "title": "Git 服务模块",
+      "description": "## 描述\n\n封装 Git 操作，供执行引擎调用。所有 Git 命令通过 Python subprocess 调用本地 git CLI。\n\n## 功能描述\n\n封装 Git 操作，供执行引擎调用。所有 Git 命令通过 Python subprocess 调用本地 git CLI。\n\n### 验收标准\n\n- create_branch(repo_path, branch_name, base=\"dev\") 从 dev 切出新分支\n- create_worktree(repo_path, worktree_path, branch_name) 创建 worktree\n- remove_worktree(repo_path, worktree_path) 删除 worktree\n- commit_and_push(worktree_path, message) 在 worktree 内提交并推送\n- 任意步骤失败时抛出包含 git stderr 的异常，调用方统一处理",
+      "module": "执行引擎",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "create_branch(repo_path, branch_name, base=\"dev\") 从 dev 切出新分支",
+        "create_worktree(repo_path, worktree_path, branch_name) 创建 worktree",
+        "remove_worktree(repo_path, worktree_path) 删除 worktree",
+        "commit_and_push(worktree_path, message) 在 worktree 内提交并推送",
+        "任意步骤失败时抛出包含 git stderr 的异常，调用方统一处理"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t05-prompt-builder",
+      "type": "feature",
+      "title": "Prompt 构建器",
+      "description": "## 描述\n\n根据任务信息和经验总结，构造发送给 Claude Code 的完整 Prompt 文本。\n\n## 功能描述\n\n根据任务信息和经验总结，构造发送给 Claude Code 的完整 Prompt 文本。\n\n### 验收标准\n\n- 输出包含：任务类型/标题/模块/描述、验收标准列表、分支和 worktree 路径说明\n- 若 经验总结.md 非空，将其全文附加到 Prompt 中\n- Prompt 末尾包含明确的结果格式要求：SUCCESS 或 FAILURE: <原因>\n- Prompt 为纯文本字符串，无多余格式",
+      "module": "执行引擎",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "输出包含：任务类型/标题/模块/描述、验收标准列表、分支和 worktree 路径说明",
+        "若 经验总结.md 非空，将其全文附加到 Prompt 中",
+        "Prompt 末尾包含明确的结果格式要求：SUCCESS 或 FAILURE: <原因>",
+        "Prompt 为纯文本字符串，无多余格式"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t06-process-manager",
+      "type": "feature",
+      "title": "进程管理器",
+      "description": "## 描述\n\n负责 Claude Code 子进程的启动、监控和终止，维护进程池。\n\n## 功能描述\n\n负责 Claude Code 子进程的启动、监控和终止，维护进程池。\n\n### 验收标准\n\n- start(task_id, worktree_path, prompt) 以 worktree 为工作目录启动 claude --print <prompt> 进程\n- 进程池以 task_id 为键存储运行中的进程句柄\n- stop(task_id) 终止指定进程并从进程池移除\n- 进程启动失败时抛出 50003 对应异常\n- 进程意外退出时触发回调，通知执行引擎处理状态",
+      "module": "执行引擎",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "start(task_id, worktree_path, prompt) 以 worktree 为工作目录启动 claude --print <prompt> 进程",
+        "进程池以 task_id 为键存储运行中的进程句柄",
+        "stop(task_id) 终止指定进程并从进程池移除",
+        "进程启动失败时抛出 50003 对应异常",
+        "进程意外退出时触发回调，通知执行引擎处理状态"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t07-execution-engine",
+      "type": "feature",
+      "title": "输出解析器与执行引擎整合",
+      "description": "## 描述\n\n异步监听 Claude Code 进程 stdout，解析结果标记，驱动任务状态机。整合 Git 服务、进程管理、Prompt 构建为完整的执行引擎。\n\n## 功能描述\n\n异步监听 Claude Code 进程 stdout，解析结果标记，驱动任务状态机。整合 Git 服务、进程管理、Prompt 构建为完整的执行引擎。\n\n### 验收标准\n\n- 逐行读取 stdout，识别最后一行的 SUCCESS 或 FAILURE: <原因> 标记\n- SUCCESS：更新任务状态为 pending_review\n- FAILURE：更新任务状态为 failed，调用 FileWriter 追加经验总结\n- 进程意外退出（无结果标记）：状态置为 failed，写入异常信息到经验总结\n- POST /api/tasks/{taskId}/execute 触发完整流程：校验状态 → 创建分支 → 创建 worktree → 构建 Prompt → 启动进程 → 状态置为 in_progress，接口立即返回\n- 取消任务时同步终止进程并调用 remove_worktree",
+      "module": "执行引擎",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "逐行读取 stdout，识别最后一行的 SUCCESS 或 FAILURE: <原因> 标记",
+        "SUCCESS：更新任务状态为 pending_review",
+        "FAILURE：更新任务状态为 failed，调用 FileWriter 追加经验总结",
+        "进程意外退出（无结果标记）：状态置为 failed，写入异常信息到经验总结",
+        "POST /api/tasks/{taskId}/execute 触发完整流程：校验状态 → 创建分支 → 创建 worktree → 构建 Prompt → 启动进程 → 状态置为 in_progress，接口立即返回",
+        "取消任务时同步终止进程并调用 remove_worktree"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t08-log-service",
+      "type": "feature",
+      "title": "日志服务模块",
+      "description": "## 描述\n\n将 Claude Code 进程输出持久化为 JSONL 文件，并通过 SSE 实时推送到前端。\n\n## 功能描述\n\n将 Claude Code 进程输出持久化为 JSONL 文件，并通过 SSE 实时推送到前端。\n\n### 验收标准\n\n- 每行 stdout 写入 data/logs/{task-id}.jsonl，格式 {\"ts\": ..., \"stream\": \"stdout\", \"line\": ...}\n- GET /api/tasks/{taskId}/logs 返回历史日志数组，按时间升序\n- GET /api/tasks/{taskId}/logs/stream 建立 SSE 连接，进程运行中实时推送，推送格式符合接口设计第四章定义\n- 进程结束后发送 event: done，任务已结束时订阅可直接返回历史日志后关闭",
+      "module": "日志服务",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "每行 stdout 写入 data/logs/{task-id}.jsonl，格式 {\"ts\": ..., \"stream\": \"stdout\", \"line\": ...}",
+        "GET /api/tasks/{taskId}/logs 返回历史日志数组，按时间升序",
+        "GET /api/tasks/{taskId}/logs/stream 建立 SSE 连接，进程运行中实时推送，推送格式符合接口设计第四章定义",
+        "进程结束后发送 event: done，任务已结束时订阅可直接返回历史日志后关闭"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t09-file-writer",
+      "type": "feature",
+      "title": "文件写入模块",
+      "description": "## 描述\n\n向被管理项目的文档文件追加经验总结，以及生成 Bug 报告文件。\n\n## 功能描述\n\n向被管理项目的文档文件追加经验总结，以及生成 Bug 报告文件。\n\n### 验收标准\n\n- append_experience(project_path, task_title, failure_reason) 向 docs/开发文档/经验总结.md 追加符合 PRD 3.6 格式的内容\n- create_bug_report(project_path, task, failed_criteria) 在 docs/bug/ 下生成 Bug 报告，文件名格式 <YYYY-MM-DD>-<模块>-<功能>-<简短描述>.md，内容符合 PRD F-12 模板\n- read_experience(project_path) 读取 经验总结.md 全文，文件不存在时返回空字符串\n- docs/bug/ 目录不存在时自动创建",
+      "module": "文件写入",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "append_experience(project_path, task_title, failure_reason) 向 docs/开发文档/经验总结.md 追加符合 PRD 3.6 格式的内容",
+        "create_bug_report(project_path, task, failed_criteria) 在 docs/bug/ 下生成 Bug 报告，文件名格式 <YYYY-MM-DD>-<模块>-<功能>-<简短描述>.md，内容符合 PRD F-12 模板",
+        "read_experience(project_path) 读取 经验总结.md 全文，文件不存在时返回空字符串",
+        "docs/bug/ 目录不存在时自动创建"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t10-review-api",
+      "type": "feature",
+      "title": "Review 接口与提交流程",
+      "description": "## 描述\n\n实现 POST /api/tasks/{taskId}/review 接口，处理测试通过和测试失败两条路径。\n\n## 功能描述\n\n实现 POST /api/tasks/{taskId}/review 接口，处理测试通过和测试失败两条路径。\n\n### 验收标准\n\n- result=pass：调用 commit_and_push → remove_worktree → 任务状态置为 completed，响应含 branch 信息\n- result=fail：调用 create_bug_report → 创建新 bug 类型任务 → 原任务状态置为 failed，响应含 bugReportPath 和 newBugTaskId\n- result=fail 且 failedCriteria 为空时返回 40001\n- 前置状态校验：非 pending_review 状态返回 40901",
+      "module": "任务管理",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "result=pass：调用 commit_and_push → remove_worktree → 任务状态置为 completed，响应含 branch 信息",
+        "result=fail：调用 create_bug_report → 创建新 bug 类型任务 → 原任务状态置为 failed，响应含 bugReportPath 和 newBugTaskId",
+        "result=fail 且 failedCriteria 为空时返回 40001",
+        "前置状态校验：非 pending_review 状态返回 40901"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m2-t11-bug-api",
+      "type": "feature",
+      "title": "Bug 报告列表 API",
+      "description": "## 描述\n\n扫描项目 docs/bug/ 目录，解析 Bug 报告文件头，返回摘要列表。\n\n## 功能描述\n\n扫描项目 docs/bug/ 目录，解析 Bug 报告文件头，返回摘要列表。\n\n### 验收标准\n\n- GET /api/projects/{projectId}/bugs 扫描 docs/bug/*.md\n- 解析文件名得到 createdAt、module、feature、description\n- 解析文件头元数据（时间、模块、功能、任务 ID）\n- 按 createdAt 降序返回，目录不存在时返回空数组",
+      "module": "文件写入",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "GET /api/projects/{projectId}/bugs 扫描 docs/bug/*.md",
+        "解析文件名得到 createdAt、module、feature、description",
+        "解析文件头元数据（时间、模块、功能、任务 ID）",
+        "按 createdAt 降序返回，目录不存在时返回空数组"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m3-t01-frontend-init",
+      "type": "feature",
+      "title": "前端工程初始化",
+      "description": "## 描述\n\n搭建 Vue3 + TypeScript + Vite + TailwindCSS 前端工程骨架。\n\n## 功能描述\n\n搭建 Vue3 + TypeScript + Vite + TailwindCSS 前端工程骨架。\n\n### 验收标准\n\n- 按架构设计建立 frontend/src/ 目录结构\n- TailwindCSS 配置完成，基础样式生效\n- npm run dev 启动后访问 http://localhost:5173 可看到默认页面\n- npm run build 构建无报错",
+      "module": "前端基础",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "按架构设计建立 frontend/src/ 目录结构",
+        "TailwindCSS 配置完成，基础样式生效",
+        "npm run dev 启动后访问 http://localhost:5173 可看到默认页面",
+        "npm run build 构建无报错"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m3-t02-frontend-router",
+      "type": "feature",
+      "title": "前端路由配置",
+      "description": "## 描述\n\n配置 Vue Router，定义全部页面路由。\n\n## 功能描述\n\n配置 Vue Router，定义全部页面路由。\n\n### 验收标准\n\n- 配置 4 条路由：/、/project/:id、/project/:id/task/:taskId、/project/:id/bugs\n- 路由切换流畅，刷新页面不丢失路由状态\n- 不存在的路由重定向到 /",
+      "module": "前端基础",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "配置 4 条路由：/、/project/:id、/project/:id/task/:taskId、/project/:id/bugs",
+        "路由切换流畅，刷新页面不丢失路由状态",
+        "不存在的路由重定向到 /"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m3-t03-types-and-api",
+      "type": "feature",
+      "title": "TypeScript 类型定义与 API 层封装",
+      "description": "## 描述\n\n在 src/types/ 定义全部 TypeScript 类型，在 src/api/ 封装 HTTP 请求函数。\n\n## 功能描述\n\n在 src/types/ 定义全部 TypeScript 类型，在 src/api/ 封装 HTTP 请求函数。\n\n### 验收标准\n\n- types/project.ts、types/task.ts、types/log.ts 与接口设计第一章 TypeScript 类型定义完全对应\n- api/projects.ts：封装项目相关 4 个接口\n- api/tasks.ts：封装任务相关 6 个接口\n- api/logs.ts：封装历史日志查询接口\n- 统一的请求基础配置（baseURL、错误拦截、响应解包）",
+      "module": "前端基础",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "types/project.ts、types/task.ts、types/log.ts 与接口设计第一章 TypeScript 类型定义完全对应",
+        "api/projects.ts：封装项目相关 4 个接口",
+        "api/tasks.ts：封装任务相关 6 个接口",
+        "api/logs.ts：封装历史日志查询接口",
+        "统一的请求基础配置（baseURL、错误拦截、响应解包）"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m4-t01-ui-components",
+      "type": "feature",
+      "title": "通用 UI 组件",
+      "description": "## 描述\n\n开发架构设计 5.3 中定义的全部通用组件。\n\n## 功能描述\n\n开发架构设计 5.3 中定义的全部通用组件。\n\n### 验收标准\n\n- TaskStatusBadge：6 种状态对应不同颜色文字徽标\n- TaskCard：展示类型标签（feature/bug 不同色）、标题、模块、更新时间，含快捷操作按钮插槽\n- MarkdownRenderer：渲染 Markdown 文本，支持代码块高亮\n- AcceptanceCriteria：验收标准列表，每项可独立勾选，emit 勾选事件\n- LogViewer：终端深色背景风格，日志行逐行追加，自动滚动到底部",
+      "module": "前端组件",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "TaskStatusBadge：6 种状态对应不同颜色文字徽标",
+        "TaskCard：展示类型标签（feature/bug 不同色）、标题、模块、更新时间，含快捷操作按钮插槽",
+        "MarkdownRenderer：渲染 Markdown 文本，支持代码块高亮",
+        "AcceptanceCriteria：验收标准列表，每项可独立勾选，emit 勾选事件",
+        "LogViewer：终端深色背景风格，日志行逐行追加，自动滚动到底部"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m4-t02-project-list-page",
+      "type": "feature",
+      "title": "项目列表页",
+      "description": "## 描述\n\n实现路由 / 对应的项目列表页，使用 useProjects 组合函数。\n\n## 功能描述\n\n实现路由 / 对应的项目列表页，使用 useProjects 组合函数。\n\n### 验收标准\n\n- 以卡片网格展示所有项目，含项目名、路径、各状态任务数量统计\n- 「添加项目」弹窗：输入名称和本地路径，提交调用 POST /api/projects\n- 添加失败（路径不存在等）时展示后端返回的错误信息\n- 支持移除项目（二次确认）\n- 点击项目卡片跳转到项目看板页",
+      "module": "前端页面",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "以卡片网格展示所有项目，含项目名、路径、各状态任务数量统计",
+        "「添加项目」弹窗：输入名称和本地路径，提交调用 POST /api/projects",
+        "添加失败（路径不存在等）时展示后端返回的错误信息",
+        "支持移除项目（二次确认）",
+        "点击项目卡片跳转到项目看板页"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m4-t03-task-board-page",
+      "type": "feature",
+      "title": "项目看板页",
+      "description": "## 描述\n\n实现路由 /project/:id 对应的任务看板页，使用 useTaskBoard 组合函数。\n\n## 功能描述\n\n实现路由 /project/:id 对应的任务看板页，使用 useTaskBoard 组合函数。\n\n### 验收标准\n\n- 以 6 列看板展示任务（对应 6 种状态），每列内任务按 updatedAt 降序\n- 每个 TaskCard 展示类型标签、标题、模块、更新时间\n- 看板顶部展示项目名和「同步任务清单」按钮，同步后刷新看板数据\n- 点击 TaskCard 跳转至任务详情页",
+      "module": "前端页面",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "以 6 列看板展示任务（对应 6 种状态），每列内任务按 updatedAt 降序",
+        "每个 TaskCard 展示类型标签、标题、模块、更新时间",
+        "看板顶部展示项目名和「同步任务清单」按钮，同步后刷新看板数据",
+        "点击 TaskCard 跳转至任务详情页"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m4-t04-task-detail-page",
+      "type": "feature",
+      "title": "任务详情页",
+      "description": "## 描述\n\n实现路由 /project/:id/task/:taskId 对应的任务详情页，使用 useTask 和 useLogStream 组合函数。\n\n## 功能描述\n\n实现路由 /project/:id/task/:taskId 对应的任务详情页，使用 useTask 和 useLogStream 组合函数。\n\n### 验收标准\n\n- 展示任务基本信息（ID、类型、标题、模块、状态、分支、worktree 路径、时间）\n- 用 MarkdownRenderer 渲染任务描述\n- 用 AcceptanceCriteria 展示验收标准（pending_review 状态下可勾选）\n- 状态为 pending 时展示「执行」按钮，点击调用 POST execute 接口\n- 状态为 in_progress 或 pending_review 时展示「取消」按钮\n- 状态为 failed 时展示「重置」按钮\n- 状态为 pending_review 时展示「通过」和「不通过」按钮，调用 review 接口\n- 执行中和 pending_review 时展示 LogViewer，通过 useLogStream 实时接收 SSE 日志\n- 若有关联 Bug 报告，展示文件路径链接",
+      "module": "前端页面",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "展示任务基本信息（ID、类型、标题、模块、状态、分支、worktree 路径、时间）",
+        "用 MarkdownRenderer 渲染任务描述",
+        "用 AcceptanceCriteria 展示验收标准（pending_review 状态下可勾选）",
+        "状态为 pending 时展示「执行」按钮，点击调用 POST execute 接口",
+        "状态为 in_progress 或 pending_review 时展示「取消」按钮",
+        "状态为 failed 时展示「重置」按钮",
+        "状态为 pending_review 时展示「通过」和「不通过」按钮，调用 review 接口",
+        "执行中和 pending_review 时展示 LogViewer，通过 useLogStream 实时接收 SSE 日志",
+        "若有关联 Bug 报告，展示文件路径链接"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m4-t05-bug-list-page",
+      "type": "feature",
+      "title": "Bug 列表页",
+      "description": "## 描述\n\n实现路由 /project/:id/bugs 对应的 Bug 报告列表页，使用 useBugs 组合函数。\n\n## 功能描述\n\n实现路由 /project/:id/bugs 对应的 Bug 报告列表页，使用 useBugs 组合函数。\n\n### 验收标准\n\n- 以列表展示所有 Bug 报告，含文件名、模块、功能、描述、创建时间\n- 按创建时间降序排列\n- Bug 列表为空时展示友好提示\n- 从项目看板页导航入口可进入此页",
+      "module": "前端页面",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "以列表展示所有 Bug 报告，含文件名、模块、功能、描述、创建时间",
+        "按创建时间降序排列",
+        "Bug 列表为空时展示友好提示",
+        "从项目看板页导航入口可进入此页"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    },
+    {
+      "id": "m4-t06-log-stream-composable",
+      "type": "feature",
+      "title": "useLogStream 组合函数（SSE 日志流）",
+      "description": "## 描述\n\n封装 SSE 日志流订阅逻辑，供任务详情页 LogViewer 使用。\n\n## 功能描述\n\n封装 SSE 日志流订阅逻辑，供任务详情页 LogViewer 使用。\n\n### 验收标准\n\n- 组件挂载时建立 EventSource 连接\n- 监听 log 事件，将每行日志追加到响应式日志列表\n- 监听 done / error 事件，关闭连接并更新连接状态\n- 组件卸载时自动关闭 EventSource 连接，不内存泄漏\n- 任务处于非运行状态时，先加载历史日志再展示（不建立 SSE 连接）",
+      "module": "前端组件",
+      "status": "pending",
+      "acceptanceCriteria": [
+        "组件挂载时建立 EventSource 连接",
+        "监听 log 事件，将每行日志追加到响应式日志列表",
+        "监听 done / error 事件，关闭连接并更新连接状态",
+        "组件卸载时自动关闭 EventSource 连接，不内存泄漏",
+        "任务处于非运行状态时，先加载历史日志再展示（不建立 SSE 连接）"
+      ],
+      "branch": null,
+      "worktreePath": null,
+      "bugReportPath": null,
+      "createdAt": "2026-02-27T16:00:00+08:00",
+      "updatedAt": "2026-02-27T16:00:00+08:00"
+    }
+  ]
+}
