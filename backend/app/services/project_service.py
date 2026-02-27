@@ -7,7 +7,8 @@ from app.core.exceptions import (
     DuplicatePathError,
     ProjectNotFoundError,
 )
-from app.models import Project, TaskStats
+from app.models import Project, TaskStats, Task, TaskStatus
+from app.services.task_service import TaskService
 
 
 class ProjectService:
@@ -15,11 +16,42 @@ class ProjectService:
 
     def __init__(self, data_dir: str = "data"):
         self.projects_file = Path(data_dir) / "projects.json"
+        self.task_service = TaskService(data_dir)
 
     def list_projects(self) -> List[Project]:
         """获取所有项目列表"""
-        projects = read_json(str(self.projects_file), default=[])
-        return [Project(**p) for p in projects]
+        projects_data = read_json(str(self.projects_file), default=[])
+        projects = []
+        for p_data in projects_data:
+            # 添加 taskStats
+            tasks = self.task_service.list_tasks(p_data["id"])
+            task_stats = self._calculate_stats(tasks)
+            p_data["taskStats"] = task_stats
+            projects.append(Project(**p_data))
+        return projects
+
+    def _calculate_stats(self, tasks: List[Task]) -> dict:
+        """计算任务统计"""
+        stats = {
+            "total": len(tasks),
+            "pending": 0,
+            "in_progress": 0,
+            "pending_review": 0,
+            "completed": 0,
+            "failed": 0,
+            "cancelled": 0,
+        }
+
+        for task in tasks:
+            status = (
+                task.status.value
+                if isinstance(task.status, TaskStatus)
+                else str(task.status)
+            )
+            if status in stats:
+                stats[status] += 1
+
+        return stats
 
     def save_projects(self, projects: List[Project]) -> None:
         """保存项目列表"""
