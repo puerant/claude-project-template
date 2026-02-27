@@ -108,7 +108,7 @@
       "title": "任务管理模块与 API",
       "description": "## 描述\n\n实现任务的查询和状态机流转，对应接口设计第三章（不含执行相关接口）。\n\n## 功能描述\n\n实现任务的查询和状态机流转，对应接口设计第三章（不含执行相关接口）。\n\n### 验收标准\n\n- GET /api/projects/{projectId}/tasks 支持 status / type 过滤，按 updatedAt 降序\n- GET /api/tasks/{taskId} 返回完整任务详情\n- POST /api/tasks/{taskId}/cancel 仅允许 pending / in_progress / pending_review 状态流转\n- POST /api/tasks/{taskId}/reset 仅允许 failed 状态流转，清空 branch / worktreePath 字段\n- 非法状态流转返回 40901",
       "module": "任务管理",
-      "status": "pending",
+      "status": "completed",
       "acceptanceCriteria": [
         "GET /api/projects/{projectId}/tasks 支持 status / type 过滤，按 updatedAt 降序",
         "GET /api/tasks/{taskId} 返回完整任务详情",
@@ -120,7 +120,7 @@
       "worktreePath": null,
       "bugReportPath": null,
       "createdAt": "2026-02-27T16:00:00+08:00",
-      "updatedAt": "2026-02-27T16:00:00+08:00"
+      "updatedAt": "2026-02-27T20:00:00+08:00"
     },
     {
       "id": "m2-t04-git-service",
