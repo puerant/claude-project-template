@@ -56,8 +56,18 @@ class LogEntry(BaseModel):
     stream: LogStream = LogStream.STDOUT
     line: str
 
+class BugReport(BaseModel):
+    filename: str
+    relativePath: str
+    taskId: str
+    module: str
+    feature: str
+    description: str
+    createdAt: str
+
 __all__ = [
-    "Project", "TaskStats", "Task", "TaskType", "TaskStatus", "LogEntry", "LogStream"
+    "Project", "TaskStats", "Task", "TaskType", "TaskStatus",
+    "LogEntry", "LogStream", "BugReport",
 ]
 
 if __name__ == "__main__":
