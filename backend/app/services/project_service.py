@@ -80,6 +80,14 @@ class ProjectService:
 
         return new_project
 
+    def get_project(self, project_id: str) -> Project:
+        """根据 ID 获取项目"""
+        projects = self.list_projects()
+        for p in projects:
+            if p.id == project_id:
+                return p
+        raise ProjectNotFoundError()
+
     def delete_project(self, project_id: str) -> None:
         """删除项目"""
         projects = self.list_projects()
