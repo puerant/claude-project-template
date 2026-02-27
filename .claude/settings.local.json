@@ -8,7 +8,18 @@
       "Bash(git worktree remove feat/001-backend-init)",
       "Bash(backend/requirements.txt:*)",
       "Bash(backend/main.py:*)",
-      "Bash(python -m pip install -r requirements.txt --quiet --disable-pip-version-check)"
+      "Bash(python -m pip install -r requirements.txt --quiet --disable-pip-version-check)",
+      "Bash(git add docs/开发文档/feature/012-file-write-service/)",
+      "Bash(git commit:*)",
+      "Bash(python -c \":*)",
+      "Bash(pip install -r requirements.txt -q)",
+      "Bash(git add backend/app/services/file_write_service.py backend/app/services/project_service.py backend/app/routers/review.py backend/app/main.py)",
+      "Bash(git merge:*)",
+      "Bash(git worktree remove .worktrees/feat/012-file-write-service)",
+      "Bash(git branch -d feat/012-file-write-service)",
+      "Bash(git add docs/开发文档/任务清单.md)",
+      "Bash(git push origin master)",
+      "Bash(git add \"docs/开发文档/feature/013-bug-report-api/\")"
     ]
   }
 }
