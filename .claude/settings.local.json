@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(git add -A)",
-      "Bash(git commit -m \"docs: 完成 PRD、架构设计、接口设计、任务清单文档:*)"
+      "Bash(git commit -m \"docs: 完成 PRD、架构设计、接口设计、任务清单文档:*)",
+      "Bash(git checkout -b feat/001-backend-init)",
+      "Bash(git worktree add .worktrees/feat/001-backend-init feat/001-backend-init)",
+      "Bash(git worktree remove feat/001-backend-init)",
+      "Bash(backend/requirements.txt:*)",
+      "Bash(backend/main.py:*)",
+      "Bash(python -m pip install -r requirements.txt --quiet --disable-pip-version-check)"
     ]
   }
 }
