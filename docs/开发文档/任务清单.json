@@ -88,7 +88,7 @@
       "title": "任务清单解析模块",
       "description": "## 描述\n\n将项目的 docs/开发文档/任务清单.md 解析为结构化任务数据，并支持合并更新。\n\n## 功能描述\n\n### 2.1 解析规则\n\n- 按 ## / ### 标题边界分割任务\n- 识别 [feature] / [bug] 类型标记\n- 提取模块名（**模块**：字段）、验收标准（**验收标准**：下的列表项）\n\n### 2.2 合并更新\n\nPOST /api/projects/{projectId}/sync 触发解析，新任务追加，已有任务状态不重置。\n\n### 验收标准\n\n- 按 ## / ### 标题边界分割任务\n- 识别 [feature] / [bug] 类型标记\n- 提取模块名（**模块**：字段）、验收标准（**验收标准**：下的列表项）\n- POST /api/projects/{projectId}/sync 触发解析，新任务追加，已有任务状态不重置\n- 响应返回 { added, unchanged, total }",
       "module": "任务解析",
-      "status": "pending",
+      "status": "completed",
       "acceptanceCriteria": [
         "按 ## / ### 标题边界分割任务",
         "识别 [feature] / [bug] 类型标记",
@@ -100,7 +100,7 @@
       "worktreePath": null,
       "bugReportPath": null,
       "createdAt": "2026-02-27T16:00:00+08:00",
-      "updatedAt": "2026-02-27T16:00:00+08:00"
+      "updatedAt": "2026-02-27T19:00:00+08:00"
     },
     {
       "id": "m2-t03-task-api",
