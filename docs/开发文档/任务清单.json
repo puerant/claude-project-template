@@ -208,7 +208,7 @@
       "title": "日志服务模块",
       "description": "## 描述\n\n将 Claude Code 进程输出持久化为 JSONL 文件，并通过 SSE 实时推送到前端。\n\n## 功能描述\n\n将 Claude Code 进程输出持久化为 JSONL 文件，并通过 SSE 实时推送到前端。\n\n### 验收标准\n\n- 每行 stdout 写入 data/logs/{task-id}.jsonl，格式 {\"ts\": ..., \"stream\": \"stdout\", \"line\": ...}\n- GET /api/tasks/{taskId}/logs 返回历史日志数组，按时间升序\n- GET /api/tasks/{taskId}/logs/stream 建立 SSE 连接，进程运行中实时推送，推送格式符合接口设计第四章定义\n- 进程结束后发送 event: done，任务已结束时订阅可直接返回历史日志后关闭",
       "module": "日志服务",
-      "status": "pending",
+      "status": "completed",
       "acceptanceCriteria": [
         "每行 stdout 写入 data/logs/{task-id}.jsonl，格式 {\"ts\": ..., \"stream\": \"stdout\", \"line\": ...}",
         "GET /api/tasks/{taskId}/logs 返回历史日志数组，按时间升序",
@@ -219,7 +219,7 @@
       "worktreePath": null,
       "bugReportPath": null,
       "createdAt": "2026-02-27T16:00:00+08:00",
-      "updatedAt": "2026-02-27T16:00:00+08:00"
+      "updatedAt": "2026-02-28T01:00:00+08:00"
     },
     {
       "id": "m2-t09-file-writer",
