@@ -3,6 +3,7 @@ from typing import List, Optional
 from app.core import read_json, write_json
 from app.models import Task, TaskStatus, TaskType
 from app.services.task_parser import TaskParser
+from app.services.execution_service import ExecutionService
 from app.core.exceptions import InvalidStatusTransitionError
 
 
@@ -13,6 +14,7 @@ class TaskService:
         self.tasks_dir = Path(data_dir) / "tasks"
         self.tasks_dir.mkdir(parents=True, exist_ok=True)
         self.parser = TaskParser()
+        self.execution_service = ExecutionService()
 
     def get_tasks_file(self, project_id: str) -> Path:
         """获取项目的任务文件路径"""
@@ -135,3 +137,45 @@ class TaskService:
 
         self.save_tasks(project_id, tasks)
         return task
+
+    def get_task_by_id(self, task_id: str) -> tuple[Task, str]:
+        """
+        通过 task_id 获取任务（遍历所有项目）
+        Returns:
+            (task, project_id): 任务和所属项目 ID
+        Raises:
+            ValueError: 任务不存在
+        """
+        # 遍历所有任务文件
+        for tasks_file in self.tasks_dir.glob("*.json"):
+            tasks = read_json(str(tasks_file), default=[])
+            for task_data in tasks:
+                if task_data["id"] == task_id:
+                    return Task(**task_data), tasks_file.stem
+        raise ValueError(f"任务 {task_id} 不存在")
+
+    def execute_task(self, project_id: str, task_id: str) -> Task:
+        """执行任务"""
+        # 获取任务
+        task = self.get_task(project_id, task_id)
+        if task is None:
+            raise ValueError(f"任务 {task_id} 不存在")
+
+        # 获取项目路径
+        from app.services.project_service import ProjectService
+        project_service = ProjectService()
+        project = project_service.get_project(project_id)
+        project_path = project.path
+
+        # 执行任务
+        updated_task = self.execution_service.execute(task, project_path)
+
+        # 保存任务
+        tasks = self.list_tasks(project_id)
+        for i, t in enumerate(tasks):
+            if t.id == task_id:
+                tasks[i] = updated_task
+                break
+        self.save_tasks(project_id, tasks)
+
+        return updated_task

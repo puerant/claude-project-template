@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import project, task, process
+from app.routers import project, task, process, execution
 
 def create_app() -> FastAPI:
     """创建并配置 FastAPI 应用实例"""
@@ -23,6 +23,7 @@ def create_app() -> FastAPI:
     app.include_router(project.router)
     app.include_router(task.router)
     app.include_router(process.router)
+    app.include_router(execution.router)
 
     @app.get("/")
     async def root():
