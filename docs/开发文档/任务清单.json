@@ -27,7 +27,7 @@
       "title": "Pydantic 数据模型定义",
       "description": "## 描述\n\n定义系统全部 Pydantic 数据模型，作为后端的数据契约基础。\n\n## 功能描述\n\n定义项目、任务、日志三大实体的 Pydantic 模型，以及任务类型和状态的枚举类型。\n\n### 2.1 项目模型（Project）\n\n包含以下字段：id、name、path、createdAt、taskStats。\n\n### 2.2 任务模型（Task）\n\n包含以下字段：id、projectId、type、title、description、module、status、acceptanceCriteria、branch、worktreePath、bugReportPath、createdAt、updatedAt。\n\n### 2.3 日志模型（LogEntry）\n\n包含以下字段：ts、stream、line。\n\n### 2.4 枚举类型\n\nTaskType：FEATURE / BUG；TaskStatus：PENDING / IN_PROGRESS / PENDING_REVIEW / COMPLETED / FAILED / CANCELLED。",
       "module": "后端基础",
-      "status": "pending",
+      "status": "completed",
       "acceptanceCriteria": [
         "models/project.py 定义 Project 和 TaskStats 模型",
         "models/task.py 定义 Task 模型以及 TaskType、TaskStatus 枚举",
@@ -40,7 +40,7 @@
       "worktreePath": null,
       "bugReportPath": null,
       "createdAt": "2026-02-27T16:00:00+08:00",
-      "updatedAt": "2026-02-27T16:00:00+08:00"
+      "updatedAt": "2026-02-27T16:30:44.661533"
     },
     {
       "id": "m1-t03-json-persistence",
