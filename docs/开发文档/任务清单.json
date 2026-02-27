@@ -167,7 +167,7 @@
       "title": "进程管理器",
       "description": "## 描述\n\n负责 Claude Code 子进程的启动、监控和终止，维护进程池。\n\n## 功能描述\n\n负责 Claude Code 子进程的启动、监控和终止，维护进程池。\n\n### 验收标准\n\n- start(task_id, worktree_path, prompt) 以 worktree 为工作目录启动 claude --print <prompt> 进程\n- 进程池以 task_id 为键存储运行中的进程句柄\n- stop(task_id) 终止指定进程并从进程池移除\n- 进程启动失败时抛出 50003 对应异常\n- 进程意外退出时触发回调，通知执行引擎处理状态",
       "module": "执行引擎",
-      "status": "pending",
+      "status": "completed",
       "acceptanceCriteria": [
         "start(task_id, worktree_path, prompt) 以 worktree 为工作目录启动 claude --print <prompt> 进程",
         "进程池以 task_id 为键存储运行中的进程句柄",
@@ -179,7 +179,7 @@
       "worktreePath": null,
       "bugReportPath": null,
       "createdAt": "2026-02-27T16:00:00+08:00",
-      "updatedAt": "2026-02-27T16:00:00+08:00"
+      "updatedAt": "2026-02-27T23:00:00+08:00"
     },
     {
       "id": "m2-t07-execution-engine",
