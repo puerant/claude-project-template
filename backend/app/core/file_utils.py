@@ -46,7 +46,13 @@ def read_json(path: str, default: Union[dict, list] | None = None) -> Union[dict
         raise FileNotFoundError(f"File not found: {path}")
 
     with open(file_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+        content = f.read()
+        if not content.strip():
+            # 空文件返回默认值
+            if default is not None:
+                return default
+            return []
+        return json.loads(content)
 
 
 def write_json(path: str, data: dict | list) -> None:
